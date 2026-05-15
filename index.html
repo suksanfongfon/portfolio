@@ -5,117 +5,261 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Suksan Fongfon — Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- Nav -->
-  <nav>
+  <nav id="navbar">
     <span class="logo">SF</span>
     <ul>
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
       <li><a href="#projects">Projects</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <!-- Hero -->
   <section class="hero">
-    <div class="hero-content">
-      <p class="greeting">สวัสดีครับ 👋</p>
-      <h1>Suksan <span class="accent">Fongfon</span></h1>
-      <p class="tagline">Developer · Designer · Problem Solver</p>
-      <a href="#contact" class="btn">ติดต่อผม</a>
-    </div>
-    <div class="hero-art">
-      <div class="avatar-ring">
-        <div class="avatar">SF</div>
+    <div class="hero-inner">
+      <div class="hero-content fade-in">
+        <p class="greeting">สวัสดีครับ, ผมชื่อ</p>
+        <h1 class="hero-name">Suksan <span class="accent">Fongfon</span></h1>
+        <p class="tagline">
+          ผมเป็น <span class="typed-text" id="typedText"></span><span class="cursor">|</span>
+        </p>
+        <p class="hero-desc">สร้างสิ่งใหม่ๆ ด้วยโค้ด ตั้งแต่ web app ไปจนถึง UX ที่ใช้งานได้จริง</p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">ดูผลงาน</a>
+          <a href="#contact" class="btn btn-secondary">ติดต่อผม</a>
+        </div>
+      </div>
+      <div class="hero-visual fade-in delay-2">
+        <div class="avatar-wrap">
+          <div class="avatar-bg"></div>
+          <div class="avatar">SF</div>
+        </div>
+        <div class="hero-badges">
+          <div class="badge">⚡ Open to Work</div>
+          <div class="badge">🌏 Thailand</div>
+        </div>
       </div>
     </div>
+    <a href="#about" class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"></div>
+    </a>
   </section>
 
   <!-- About -->
   <section id="about" class="section">
-    <h2>เกี่ยวกับผม</h2>
-    <p>ผมชื่อ Suksan Fongfon ชอบสร้างสิ่งใหม่ๆ ด้วยโค้ด ไม่ว่าจะเป็นเว็บ แอป หรือเครื่องมือที่ช่วยให้ชีวิตง่ายขึ้น สนใจด้าน Software Development และ UX Design</p>
+    <div class="container">
+      <div class="section-label reveal">About Me</div>
+      <h2 class="reveal">เกี่ยวกับผม</h2>
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <p>ผมชื่อ <strong>Suksan Fongfon</strong> เป็น Developer & Designer ที่มีความหลงใหลในการสร้างผลิตภัณฑ์ดิจิทัลที่ทั้งสวยงามและใช้งานได้จริง</p>
+          <p>ผมเชื่อว่าโค้ดที่ดีและ Design ที่ดีต้องไปด้วยกัน ชอบแก้ปัญหาที่ซับซ้อนด้วยวิธีที่ง่ายและสะอาด</p>
+        </div>
+        <div class="about-stats reveal delay-1">
+          <div class="stat">
+            <span class="stat-num">3+</span>
+            <span class="stat-label">ปีประสบการณ์</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">20+</span>
+            <span class="stat-label">โปรเจกต์</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">10+</span>
+            <span class="stat-label">ลูกค้าที่พอใจ</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Skills -->
   <section id="skills" class="section alt">
-    <h2>ทักษะ</h2>
-    <div class="skills-grid">
-      <div class="skill-card">
-        <span class="skill-icon">🌐</span>
-        <h3>Web Development</h3>
-        <p>HTML, CSS, JavaScript, React</p>
+    <div class="container">
+      <div class="section-label reveal">Expertise</div>
+      <h2 class="reveal">ทักษะ</h2>
+      <div class="skills-layout">
+        <div class="skills-bars reveal">
+          <h3>Technical Skills</h3>
+          <div class="skill-bar-item">
+            <div class="skill-bar-header"><span>HTML / CSS</span><span>95%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="95"></div></div>
+          </div>
+          <div class="skill-bar-item">
+            <div class="skill-bar-header"><span>JavaScript / React</span><span>85%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="85"></div></div>
+          </div>
+          <div class="skill-bar-item">
+            <div class="skill-bar-header"><span>Node.js / Python</span><span>78%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="78"></div></div>
+          </div>
+          <div class="skill-bar-item">
+            <div class="skill-bar-header"><span>UI/UX Design (Figma)</span><span>88%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="88"></div></div>
+          </div>
+          <div class="skill-bar-item">
+            <div class="skill-bar-header"><span>Git / DevOps</span><span>80%</span></div>
+            <div class="bar-track"><div class="bar-fill" data-width="80"></div></div>
+          </div>
+        </div>
+        <div class="skills-tags reveal delay-1">
+          <h3>Tools & Tech</h3>
+          <div class="tag-cloud">
+            <span class="tag">React</span>
+            <span class="tag">Next.js</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">Python</span>
+            <span class="tag">REST API</span>
+            <span class="tag">Figma</span>
+            <span class="tag">Git</span>
+            <span class="tag">GitHub Actions</span>
+            <span class="tag">Docker</span>
+            <span class="tag">PostgreSQL</span>
+            <span class="tag">Tailwind CSS</span>
+          </div>
+        </div>
       </div>
-      <div class="skill-card">
-        <span class="skill-icon">🛠️</span>
-        <h3>Backend</h3>
-        <p>Node.js, Python, REST API</p>
-      </div>
-      <div class="skill-card">
-        <span class="skill-icon">🎨</span>
-        <h3>UI/UX Design</h3>
-        <p>Figma, Prototyping, Responsive Design</p>
-      </div>
-      <div class="skill-card">
-        <span class="skill-icon">⚙️</span>
-        <h3>DevOps</h3>
-        <p>Git, GitHub, CI/CD</p>
+    </div>
+  </section>
+
+  <!-- Experience / Timeline -->
+  <section id="experience" class="section">
+    <div class="container">
+      <div class="section-label reveal">Journey</div>
+      <h2 class="reveal">ประสบการณ์</h2>
+      <div class="timeline">
+        <div class="timeline-item reveal">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">2024 – ปัจจุบัน</span>
+            <h3>Full-Stack Developer</h3>
+            <p class="timeline-company">Freelance</p>
+            <p>พัฒนา web application ให้กับลูกค้าหลายราย ตั้งแต่ออกแบบ UI ไปจนถึง deploy production</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal delay-1">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">2023 – 2024</span>
+            <h3>Frontend Developer Intern</h3>
+            <p class="timeline-company">Tech Startup · Bangkok</p>
+            <p>ทำงานกับ React, TypeScript และ REST API ช่วยพัฒนา dashboard ที่ใช้งานโดยผู้ใช้กว่า 5,000 คน</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal delay-2">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">2020 – 2024</span>
+            <h3>ปริญญาตรี วิทยาการคอมพิวเตอร์</h3>
+            <p class="timeline-company">มหาวิทยาลัยเชียงใหม่</p>
+            <p>เรียนรู้พื้นฐาน CS, Software Engineering, Algorithm และทำ project ด้าน UX Design</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Projects -->
-  <section id="projects" class="section">
-    <h2>ผลงาน</h2>
-    <div class="projects-grid">
-      <div class="project-card">
-        <div class="project-tag">Web App</div>
-        <h3>Project Alpha</h3>
-        <p>เว็บแอปพลิเคชันสำหรับจัดการงานประจำวัน พัฒนาด้วย React และ Node.js</p>
-        <div class="project-links">
-          <a href="#">GitHub</a>
-          <a href="#">Demo</a>
+  <section id="projects" class="section alt">
+    <div class="container">
+      <div class="section-label reveal">Work</div>
+      <h2 class="reveal">ผลงาน</h2>
+      <div class="projects-grid">
+        <div class="project-card reveal">
+          <div class="project-header">
+            <span class="project-tag">Web App</span>
+            <div class="project-icon">📋</div>
+          </div>
+          <h3>Project Alpha</h3>
+          <p>เว็บแอปจัดการงานประจำวัน พัฒนาด้วย React และ Node.js รองรับ real-time collaboration</p>
+          <div class="project-stack">
+            <span>React</span><span>Node.js</span><span>MongoDB</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="link-btn">GitHub →</a>
+            <a href="#" class="link-btn accent">Demo →</a>
+          </div>
         </div>
-      </div>
-      <div class="project-card">
-        <div class="project-tag">Tool</div>
-        <h3>Project Beta</h3>
-        <p>เครื่องมือวิเคราะห์ข้อมูลอัตโนมัติ ช่วยลดเวลาทำงานลง 70%</p>
-        <div class="project-links">
-          <a href="#">GitHub</a>
-          <a href="#">Demo</a>
+        <div class="project-card reveal delay-1">
+          <div class="project-header">
+            <span class="project-tag">Tool</span>
+            <div class="project-icon">📊</div>
+          </div>
+          <h3>Project Beta</h3>
+          <p>เครื่องมือวิเคราะห์ข้อมูลอัตโนมัติ ช่วยลดเวลาทำงานลง 70% ใช้ Python และ Data visualization</p>
+          <div class="project-stack">
+            <span>Python</span><span>Pandas</span><span>Chart.js</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="link-btn">GitHub →</a>
+            <a href="#" class="link-btn accent">Demo →</a>
+          </div>
         </div>
-      </div>
-      <div class="project-card">
-        <div class="project-tag">Design</div>
-        <h3>Project Gamma</h3>
-        <p>ออกแบบ UI/UX สำหรับแอปพลิเคชันมือถือด้านสุขภาพ</p>
-        <div class="project-links">
-          <a href="#">Figma</a>
-          <a href="#">Demo</a>
+        <div class="project-card reveal delay-2">
+          <div class="project-header">
+            <span class="project-tag">Design</span>
+            <div class="project-icon">🎨</div>
+          </div>
+          <h3>Project Gamma</h3>
+          <p>ออกแบบ UI/UX แอปมือถือด้านสุขภาพ ผ่าน user research และ prototype testing กว่า 20 รอบ</p>
+          <div class="project-stack">
+            <span>Figma</span><span>Prototyping</span><span>Research</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="link-btn">Figma →</a>
+            <a href="#" class="link-btn accent">Case Study →</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Contact -->
-  <section id="contact" class="section alt">
-    <h2>ติดต่อ</h2>
-    <p>สนใจร่วมงานหรือพูดคุยเรื่องโปรเจกต์? ทักมาได้เลยครับ</p>
-    <div class="contact-links">
-      <a href="mailto:suksan.cmu@gmail.com" class="contact-btn">📧 Email</a>
-      <a href="https://github.com/suksanfongfon" class="contact-btn">🐙 GitHub</a>
+  <section id="contact" class="section">
+    <div class="container contact-wrap">
+      <div class="section-label reveal">Say Hello</div>
+      <h2 class="reveal">ติดต่อผม</h2>
+      <p class="contact-sub reveal">สนใจร่วมงานหรือพูดคุยเรื่องโปรเจกต์? ทักมาได้เลยครับ ยินดีเสมอ</p>
+      <div class="contact-links reveal">
+        <a href="mailto:suksan.cmu@gmail.com" class="contact-card">
+          <span class="contact-icon">📧</span>
+          <div>
+            <strong>Email</strong>
+            <p>suksan.cmu@gmail.com</p>
+          </div>
+        </a>
+        <a href="https://github.com/suksanfongfon" class="contact-card">
+          <span class="contact-icon">💻</span>
+          <div>
+            <strong>GitHub</strong>
+            <p>suksanfongfon</p>
+          </div>
+        </a>
+      </div>
     </div>
   </section>
 
   <footer>
-    <p>© 2026 Suksan Fongfon · Built with ❤️</p>
+    <div class="container footer-inner">
+      <span class="logo">SF</span>
+      <p>© 2026 Suksan Fongfon · Built with care</p>
+      <a href="#" class="back-top">↑ Top</a>
+    </div>
   </footer>
 
+  <script src="main.js"></script>
 </body>
 </html>
