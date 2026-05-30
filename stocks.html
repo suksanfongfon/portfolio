@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Tracker | ราคาหุ้น</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: #1f2937;
+      --border2: #374151;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --green: #10b981;
+      --green-dim: #064e3b;
+      --red: #ef4444;
+      --red-dim: #450a0a;
+      --blue: #3b82f6;
+      --yellow: #f59e0b;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ─── Navbar ─── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 26, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .nav-logo .icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .nav-center { flex: 1; display: flex; justify-content: center; }
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px 8px 38px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--blue); }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text3);
+      font-size: 15px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .nav-time {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .market-status {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .market-status.open { background: rgba(16,185,129,0.15); color: var(--green); }
+    .market-status.closed { background: rgba(239,68,68,0.15); color: var(--red); }
+    .back-link {
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .back-link:hover { color: var(--text); border-color: var(--border2); }
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .refresh-btn:hover { color: var(--text); border-color: var(--border2); }
+    .refresh-btn.spinning svg { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Ticker ─── */
+    .ticker-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      overflow: hidden;
+      height: 36px;
+    }
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: 0;
+      animation: ticker 40s linear infinite;
+      width: max-content;
+    }
+    .ticker-bar:hover .ticker-track { animation-play-state: paused; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 24px;
+      font-size: 13px;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .ticker-item .t-name { color: var(--text2); font-weight: 500; }
+    .ticker-item .t-price { font-family: var(--font-mono); font-weight: 500; }
+    .ticker-item .t-chg { font-family: var(--font-mono); font-size: 12px; }
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+
+    /* ─── Main ─── */
+    .main { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
+
+    /* ─── Tabs ─── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; }
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: none;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--surface2);
+      border-color: var(--border2);
+      color: var(--text);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+    .watchlist-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    /* ─── Stock Grid ─── */
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .stock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 18px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .stock-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .stock-card.in-watchlist { border-color: rgba(59,130,246,0.3); }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-symbol {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+    .card-name {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 3px;
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-market-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface2);
+      color: var(--text3);
+      letter-spacing: 0.5px;
+    }
+    .watchlist-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      transition: all 0.2s;
+      z-index: 2;
+    }
+    .watchlist-btn:hover { color: var(--yellow); border-color: var(--yellow); }
+    .watchlist-btn.starred { color: var(--yellow); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+    .card-price-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .card-price {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-currency { font-size: 13px; color: var(--text2); margin-right: 2px; }
+    .card-change {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: right;
+    }
+    .card-sparkline {
+      margin-top: 10px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .card-sparkline canvas {
+      display: block;
+      width: 100%;
+      height: 48px;
+    }
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .card-bottom span { font-family: var(--font-mono); }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--text2);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state p { font-size: 15px; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      transform: scale(0.95);
+      transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .modal-close {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { color: var(--text); border-color: var(--border2); }
+    .modal-symbol {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .modal-company { color: var(--text2); font-size: 14px; margin-top: 2px; }
+    .modal-price-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .modal-price {
+      font-family: var(--font-mono);
+      font-size: 40px;
+      font-weight: 700;
+    }
+    .modal-change {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .modal-chart-wrap {
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface2);
+      padding: 16px;
+    }
+    .modal-chart-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 200px;
+    }
+    .chart-period-btns {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .period-btn {
+      padding: 4px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .period-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .period-btn:hover:not(.active) { color: var(--text); border-color: var(--border2); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .stat-item {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+    .stat-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--text); }
+
+    /* ─── Loading skeleton ─── */
+    .skeleton {
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      border-radius: 8px;
+    }
+    @keyframes skeleton-pulse {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── Data source note ─── */
+    .data-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 32px;
+      padding-bottom: 24px;
+    }
+    .data-note .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .navbar { padding: 0 16px; gap: 12px; }
+      .nav-center { display: none; }
+      .nav-time { display: none; }
+      .main { padding: 20px 16px; }
+      .stock-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+      .modal { padding: 20px; }
+      .modal-price { font-size: 32px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    }
+    @media (max-width: 480px) {
+      .stock-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="icon">📈</div>
+      <span>StockTH</span>
+    </a>
+    <div class="nav-center">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" type="text" placeholder="ค้นหาหุ้น เช่น AAPL, PTT..." />
+      </div>
+    </div>
+    <div class="nav-right">
+      <span class="nav-time" id="clock"></span>
+      <span class="market-status" id="marketStatus"></span>
+      <button class="refresh-btn" id="refreshBtn" title="รีเฟรช">
+        <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M1 4v6h6M23 20v-6h-6"/>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+        </svg>
+        รีเฟรช
+      </button>
+      <a href="index.html" class="back-link">← Portfolio</a>
+    </div>
+  </nav>
+
+  <!-- Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="all">ทั้งหมด</button>
+      <button class="tab-btn" data-tab="set">หุ้นไทย (SET)</button>
+      <button class="tab-btn" data-tab="us">หุ้น US</button>
+      <button class="tab-btn" data-tab="watchlist">
+        Watchlist <span class="watchlist-count" id="watchlistCount">0</span>
+      </button>
+    </div>
+
+    <!-- Stock Grid -->
+    <div class="stock-grid" id="stockGrid"></div>
+
+    <div class="data-note">
+      <span class="live-dot"></span>
+      ข้อมูลจำลองแบบ Real-time · อัปเดตทุก 3 วินาที · สร้างด้วย Canvas API
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-symbol" id="modalSymbol"></div>
+          <div class="modal-company" id="modalCompany"></div>
+        </div>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-price-row">
+        <div class="modal-price" id="modalPrice"></div>
+        <div>
+          <div class="modal-change" id="modalChange"></div>
+          <div style="font-size:12px;color:var(--text3)" id="modalTime"></div>
+        </div>
+      </div>
+      <div class="modal-chart-wrap">
+        <div class="chart-period-btns">
+          <button class="period-btn active" data-period="1d">1D</button>
+          <button class="period-btn" data-period="1w">1W</button>
+          <button class="period-btn" data-period="1m">1M</button>
+          <button class="period-btn" data-period="3m">3M</button>
+        </div>
+        <canvas id="modalChart" height="200"></canvas>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Stock Data ───────────────────────────────────────────────────────────
+    const STOCKS = [
+      // Thai SET stocks
+      { symbol: 'PTT',    name: 'PTT Public Company',         market: 'SET', currency: 'THB', sector: 'Energy',   basePrice: 32.50,  vol: 0.8 },
+      { symbol: 'ADVANC', name: 'Advanced Info Service',      market: 'SET', currency: 'THB', sector: 'Telecom',  basePrice: 215.00, vol: 0.5 },
+      { symbol: 'CPALL',  name: 'CP All Public Company',      market: 'SET', currency: 'THB', sector: 'Retail',   basePrice: 57.75,  vol: 0.6 },
+      { symbol: 'AOT',    name: 'Airports of Thailand',       market: 'SET', currency: 'THB', sector: 'Transport',basePrice: 67.25,  vol: 0.7 },
+      { symbol: 'KBANK',  name: 'Kasikornbank',               market: 'SET', currency: 'THB', sector: 'Banking',  basePrice: 139.50, vol: 0.9 },
+      { symbol: 'SCB',    name: 'SCB X Public Company',       market: 'SET', currency: 'THB', sector: 'Banking',  basePrice: 97.75,  vol: 0.9 },
+      { symbol: 'BBL',    name: 'Bangkok Bank',               market: 'SET', currency: 'THB', sector: 'Banking',  basePrice: 141.00, vol: 0.6 },
+      { symbol: 'TRUE',   name: 'True Corporation',           market: 'SET', currency: 'THB', sector: 'Telecom',  basePrice: 4.48,   vol: 1.2 },
+      // US stocks
+      { symbol: 'AAPL',   name: 'Apple Inc.',                 market: 'US',  currency: 'USD', sector: 'Tech',     basePrice: 189.50, vol: 0.7 },
+      { symbol: 'MSFT',   name: 'Microsoft Corporation',      market: 'US',  currency: 'USD', sector: 'Tech',     basePrice: 425.30, vol: 0.6 },
+      { symbol: 'NVDA',   name: 'NVIDIA Corporation',         market: 'US',  currency: 'USD', sector: 'Tech',     basePrice: 875.60, vol: 1.5 },
+      { symbol: 'GOOGL',  name: 'Alphabet Inc.',              market: 'US',  currency: 'USD', sector: 'Tech',     basePrice: 172.40, vol: 0.8 },
+      { symbol: 'AMZN',   name: 'Amazon.com Inc.',            market: 'US',  currency: 'USD', sector: 'E-commerce',basePrice:185.20, vol: 0.9 },
+      { symbol: 'TSLA',   name: 'Tesla Inc.',                 market: 'US',  currency: 'USD', sector: 'Auto/EV',  basePrice: 172.80, vol: 2.0 },
+      { symbol: 'META',   name: 'Meta Platforms Inc.',        market: 'US',  currency: 'USD', sector: 'Social',   basePrice: 515.40, vol: 1.0 },
+      { symbol: 'BRK-B',  name: 'Berkshire Hathaway B',       market: 'US',  currency: 'USD', sector: 'Finance',  basePrice: 411.20, vol: 0.4 },
+    ];
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let stockState = {};
+    let watchlist = new Set(JSON.parse(localStorage.getItem('watchlist') || '[]'));
+    let activeTab = 'all';
+    let searchQuery = '';
+    let activeModal = null;
+    let modalPeriod = '1d';
+
+    // ─── Generate historical data ─────────────────────────────────────────────
+    function generateHistory(basePrice, volatility, points) {
+      const data = [];
+      let price = basePrice * (0.95 + Math.random() * 0.1);
+      for (let i = 0; i < points; i++) {
+        const change = (Math.random() - 0.48) * volatility * 0.01 * price;
+        price = Math.max(price * 0.5, price + change);
+        data.push(parseFloat(price.toFixed(basePrice < 10 ? 2 : 2)));
+      }
+      return data;
+    }
+
+    function initState() {
+      STOCKS.forEach(s => {
+        const history1d  = generateHistory(s.basePrice, s.vol, 80);
+        const history1w  = generateHistory(s.basePrice, s.vol, 140);
+        const history1m  = generateHistory(s.basePrice, s.vol, 220);
+        const history3m  = generateHistory(s.basePrice, s.vol, 320);
+        const current = history1d[history1d.length - 1];
+        const open    = history1d[0];
+        stockState[s.symbol] = {
+          ...s,
+          price: current,
+          open,
+          dayHigh: Math.max(...history1d) * 1.002,
+          dayLow:  Math.min(...history1d) * 0.998,
+          weekHigh: Math.max(...history1w) * 1.005,
+          weekLow:  Math.min(...history1w) * 0.995,
+          volume: Math.floor((Math.random() * 15 + 5) * 1e6),
+          history1d, history1w, history1m, history3m,
+          prevClose: history1d[0],
+          mktCap: (current * (Math.random() * 8e9 + 2e9)),
+        };
+      });
+    }
+
+    // ─── Price Simulation ─────────────────────────────────────────────────────
+    function tickPrices() {
+      Object.values(stockState).forEach(s => {
+        const change = (Math.random() - 0.49) * s.vol * 0.008 * s.price;
+        s.price = Math.max(0.01, parseFloat((s.price + change).toFixed(s.basePrice < 10 ? 3 : 2)));
+        s.history1d.push(s.price);
+        if (s.history1d.length > 120) s.history1d.shift();
+        s.dayHigh = Math.max(s.dayHigh, s.price);
+        s.dayLow  = Math.min(s.dayLow, s.price);
+      });
+      renderGrid();
+      if (activeModal) renderModal(activeModal);
+      renderTicker();
+    }
+
+    // ─── Formatting ──────────────────────────────────────────────────────────
+    function fmtPrice(price, currency) {
+      if (price < 10)   return price.toFixed(3);
+      if (price < 100)  return price.toFixed(2);
+      if (price < 1000) return price.toFixed(2);
+      return price.toFixed(2);
+    }
+    function fmtChange(price, open) {
+      const ch  = price - open;
+      const pct = ((price - open) / open) * 100;
+      const sign = ch >= 0 ? '+' : '';
+      return { ch, pct, sign, isUp: ch >= 0 };
+    }
+    function fmtMktCap(val) {
+      if (val >= 1e12) return (val / 1e12).toFixed(2) + 'T';
+      if (val >= 1e9)  return (val / 1e9).toFixed(2) + 'B';
+      if (val >= 1e6)  return (val / 1e6).toFixed(1) + 'M';
+      return val.toFixed(0);
+    }
+    function fmtVol(val) {
+      if (val >= 1e9) return (val / 1e9).toFixed(2) + 'B';
+      if (val >= 1e6) return (val / 1e6).toFixed(1) + 'M';
+      if (val >= 1e3) return (val / 1e3).toFixed(0) + 'K';
+      return val.toString();
+    }
+
+    // ─── Sparkline Canvas ────────────────────────────────────────────────────
+    function drawSparkline(canvas, data, isUp) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (!w || !h) return;
+      canvas.width  = w * dpr;
+      canvas.height = h * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      if (data.length < 2) return;
+
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const range = max - min || 1;
+      const pad = 4;
+
+      const pts = data.map((v, i) => ({
+        x: (i / (data.length - 1)) * w,
+        y: h - pad - ((v - min) / range) * (h - pad * 2),
+      }));
+
+      const color = isUp ? '#10b981' : '#ef4444';
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, color + '35');
+      grad.addColorStop(1, color + '00');
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        const cpx = (pts[i - 1].x + pts[i].x) / 2;
+        ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+      }
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        const cpx = (pts[i - 1].x + pts[i].x) / 2;
+        ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // End dot
+      const last = pts[pts.length - 1];
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    // ─── Detailed Chart ───────────────────────────────────────────────────────
+    function drawDetailChart(canvas, data, isUp) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (!w || !h) return;
+      canvas.width  = w * dpr;
+      canvas.height = h * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      if (data.length < 2) return;
+
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const range = max - min || 1;
+      const padX = 8, padY = 12;
+
+      const pts = data.map((v, i) => ({
+        x: padX + (i / (data.length - 1)) * (w - padX * 2),
+        y: padY + (1 - (v - min) / range) * (h - padY * 2),
+      }));
+
+      const color = isUp ? '#10b981' : '#ef4444';
+
+      // Grid lines
+      ctx.strokeStyle = '#1f2937';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = padY + (i / 4) * (h - padY * 2);
+        ctx.beginPath();
+        ctx.moveTo(padX, y);
+        ctx.lineTo(w - padX, y);
+        ctx.stroke();
+      }
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, color + '30');
+      grad.addColorStop(1, color + '00');
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        const cpx = (pts[i-1].x + pts[i].x) / 2;
+        ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+      }
+      ctx.lineTo(pts[pts.length-1].x, h - padY);
+      ctx.lineTo(pts[0].x, h - padY);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        const cpx = (pts[i-1].x + pts[i].x) / 2;
+        ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Price label at end
+      const last = pts[pts.length - 1];
+      const lastVal = data[data.length - 1];
+      ctx.fillStyle = color;
+      ctx.font = `500 11px 'JetBrains Mono', monospace`;
+      const label = lastVal >= 100 ? lastVal.toFixed(2) : lastVal.toFixed(3);
+      const tw = ctx.measureText(label).width;
+      ctx.fillText(label, Math.min(last.x - tw / 2, w - padX - tw), last.y - 8);
+
+      // End dot
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // ─── Ticker ───────────────────────────────────────────────────────────────
+    const INDICES = [
+      { name: 'SET', baseVal: 1420.35 },
+      { name: 'S&P 500', baseVal: 5278.50 },
+      { name: 'NASDAQ', baseVal: 16850.20 },
+      { name: 'Dow Jones', baseVal: 39200.30 },
+      { name: 'Gold', baseVal: 2320.40 },
+      { name: 'USD/THB', baseVal: 35.42 },
+      { name: 'Brent Oil', baseVal: 82.15 },
+    ];
+    let indexVals = INDICES.map(ix => ({
+      ...ix,
+      val: ix.baseVal,
+      ch: (Math.random() - 0.5) * ix.baseVal * 0.005,
+    }));
+
+    function renderTicker() {
+      indexVals.forEach(ix => {
+        ix.val += (Math.random() - 0.5) * ix.baseVal * 0.0003;
+      });
+      const items = indexVals.map(ix => {
+        const isUp = ix.ch >= 0;
+        const pct = ((ix.ch) / (ix.val - ix.ch)) * 100;
+        return `
+          <div class="ticker-item">
+            <span class="t-name">${ix.name}</span>
+            <span class="t-price">${ix.val.toFixed(2)}</span>
+            <span class="t-chg ${isUp ? 'up' : 'down'}">${isUp ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('tickerTrack').innerHTML = items + items;
+    }
+
+    // ─── Clock & Market Status ────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('th-TH', { hour12: false });
+
+      const dayOfWeek = now.getDay();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const timeMin = h * 60 + m;
+
+      const setOpen  = dayOfWeek >= 1 && dayOfWeek <= 5 &&
+                       ((timeMin >= 600 && timeMin < 750) || (timeMin >= 870 && timeMin < 960));
+      const usOpen   = dayOfWeek >= 1 && dayOfWeek <= 5 &&
+                       (h >= 21 || h < 4); // rough UTC+7 estimate for NYSE
+      const isOpen   = setOpen || usOpen;
+
+      const el = document.getElementById('marketStatus');
+      el.textContent = isOpen ? '● OPEN' : '● CLOSED';
+      el.className = 'market-status ' + (isOpen ? 'open' : 'closed');
+    }
+
+    // ─── Render Grid ─────────────────────────────────────────────────────────
+    function getFilteredStocks() {
+      let stocks = Object.values(stockState);
+      if (activeTab === 'set')       stocks = stocks.filter(s => s.market === 'SET');
+      if (activeTab === 'us')        stocks = stocks.filter(s => s.market === 'US');
+      if (activeTab === 'watchlist') stocks = stocks.filter(s => watchlist.has(s.symbol));
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        stocks = stocks.filter(s =>
+          s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+        );
+      }
+      return stocks;
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('stockGrid');
+      const stocks = getFilteredStocks();
+
+      if (stocks.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">${activeTab === 'watchlist' ? '⭐' : '🔍'}</div>
+            <p>${activeTab === 'watchlist' ? 'ยังไม่มีหุ้นใน Watchlist กดดาวเพื่อเพิ่ม' : 'ไม่พบหุ้นที่ค้นหา'}</p>
+          </div>`;
+        return;
+      }
+
+      stocks.forEach(s => {
+        const { ch, pct, sign, isUp } = fmtChange(s.price, s.prevClose);
+        const cardId = `card-${s.symbol}`;
+        const isWatched = watchlist.has(s.symbol);
+        const existing = document.getElementById(cardId);
+
+        if (existing) {
+          // Update price/change only
+          const priceEl = existing.querySelector('.card-price-val');
+          const chgEl   = existing.querySelector('.card-change');
+          if (priceEl) priceEl.textContent = fmtPrice(s.price, s.currency);
+          if (chgEl) {
+            chgEl.textContent = `${sign}${ch.toFixed(2)}  (${sign}${pct.toFixed(2)}%)`;
+            chgEl.className = `card-change ${isUp ? 'up' : 'down'}`;
+          }
+          // Redraw sparkline
+          const canvas = existing.querySelector('canvas');
+          if (canvas) drawSparkline(canvas, s.history1d.slice(-40), isUp);
+        } else {
+          const card = document.createElement('div');
+          card.className = `stock-card${isWatched ? ' in-watchlist' : ''}`;
+          card.id = cardId;
+          card.innerHTML = `
+            <button class="watchlist-btn${isWatched ? ' starred' : ''}" data-symbol="${s.symbol}" title="${isWatched ? 'ลบออก' : 'เพิ่มใน'} Watchlist">
+              ${isWatched ? '★' : '☆'}
+            </button>
+            <div class="card-top">
+              <div>
+                <div class="card-symbol">${s.symbol}</div>
+                <div class="card-name">${s.name}</div>
+              </div>
+              <span class="card-market-badge">${s.market}</span>
+            </div>
+            <div class="card-price-row">
+              <div class="card-price">
+                <span class="card-currency">${s.currency}</span><span class="card-price-val">${fmtPrice(s.price, s.currency)}</span>
+              </div>
+              <div class="card-change ${isUp ? 'up' : 'down'}">
+                ${sign}${ch.toFixed(2)}  (${sign}${pct.toFixed(2)}%)
+              </div>
+            </div>
+            <div class="card-sparkline">
+              <canvas width="240" height="48"></canvas>
+            </div>
+            <div class="card-bottom">
+              <span>Vol: ${fmtVol(s.volume)}</span>
+              <span>${s.sector}</span>
+            </div>
+          `;
+          card.addEventListener('click', e => {
+            if (!e.target.closest('.watchlist-btn')) openModal(s.symbol);
+          });
+          card.querySelector('.watchlist-btn').addEventListener('click', e => {
+            e.stopPropagation();
+            toggleWatchlist(s.symbol);
+          });
+          grid.appendChild(card);
+
+          // Draw sparkline after DOM insertion
+          requestAnimationFrame(() => {
+            const canvas = card.querySelector('canvas');
+            drawSparkline(canvas, s.history1d.slice(-40), isUp);
+          });
+        }
+      });
+
+      // Remove cards no longer in list
+      const symbols = new Set(stocks.map(s => s.symbol));
+      grid.querySelectorAll('.stock-card').forEach(card => {
+        const sym = card.id.replace('card-', '');
+        if (!symbols.has(sym)) card.remove();
+      });
+    }
+
+    // ─── Watchlist ────────────────────────────────────────────────────────────
+    function toggleWatchlist(symbol) {
+      if (watchlist.has(symbol)) watchlist.delete(symbol);
+      else watchlist.add(symbol);
+      localStorage.setItem('watchlist', JSON.stringify([...watchlist]));
+      updateWatchlistCount();
+
+      const card = document.getElementById(`card-${symbol}`);
+      if (card) {
+        const btn = card.querySelector('.watchlist-btn');
+        const isW = watchlist.has(symbol);
+        btn.textContent = isW ? '★' : '☆';
+        btn.className = `watchlist-btn${isW ? ' starred' : ''}`;
+        card.className = `stock-card${isW ? ' in-watchlist' : ''}`;
+        if (activeTab === 'watchlist' && !isW) card.remove();
+      }
+    }
+
+    function updateWatchlistCount() {
+      document.getElementById('watchlistCount').textContent = watchlist.size;
+    }
+
+    // ─── Modal ────────────────────────────────────────────────────────────────
+    function openModal(symbol) {
+      activeModal = symbol;
+      modalPeriod = '1d';
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === '1d'));
+      renderModal(symbol);
+      document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      activeModal = null;
+    }
+
+    function getHistory(s) {
+      return {
+        '1d': s.history1d, '1w': s.history1w,
+        '1m': s.history1m, '3m': s.history3m,
+      }[modalPeriod] || s.history1d;
+    }
+
+    function renderModal(symbol) {
+      const s = stockState[symbol];
+      if (!s) return;
+      const { ch, pct, sign, isUp } = fmtChange(s.price, s.prevClose);
+      const hist = getHistory(s);
+
+      document.getElementById('modalSymbol').textContent = s.symbol;
+      document.getElementById('modalCompany').textContent = s.name;
+      document.getElementById('modalPrice').textContent = `${s.currency} ${fmtPrice(s.price, s.currency)}`;
+      document.getElementById('modalPrice').style.color = isUp ? 'var(--green)' : 'var(--red)';
+      document.getElementById('modalChange').textContent = `${sign}${ch.toFixed(2)}  (${sign}${pct.toFixed(2)}%)`;
+      document.getElementById('modalChange').className = `modal-change ${isUp ? 'up' : 'down'}`;
+      document.getElementById('modalTime').textContent = new Date().toLocaleString('th-TH');
+
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-item">
+          <div class="stat-label">เปิด</div>
+          <div class="stat-value">${fmtPrice(s.open, s.currency)}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">มูลค่าตลาด</div>
+          <div class="stat-value">${fmtMktCap(s.mktCap)} ${s.currency}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">สูงสุดวันนี้</div>
+          <div class="stat-value up">${fmtPrice(s.dayHigh, s.currency)}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">ต่ำสุดวันนี้</div>
+          <div class="stat-value down">${fmtPrice(s.dayLow, s.currency)}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">สูงสุด 52 สัปดาห์</div>
+          <div class="stat-value">${fmtPrice(s.weekHigh, s.currency)}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">ปริมาณซื้อขาย</div>
+          <div class="stat-value">${fmtVol(s.volume)}</div>
+        </div>
+      `;
+
+      requestAnimationFrame(() => {
+        const canvas = document.getElementById('modalChart');
+        drawDetailChart(canvas, hist, isUp);
+      });
+    }
+
+    // ─── Events ───────────────────────────────────────────────────────────────
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    });
+    document.querySelectorAll('[data-period]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        modalPeriod = btn.dataset.period;
+        if (activeModal) renderModal(activeModal);
+      });
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        document.getElementById('stockGrid').innerHTML = '';
+        renderGrid();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchQuery = e.target.value.trim();
+      document.getElementById('stockGrid').innerHTML = '';
+      renderGrid();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
+      initState();
+      renderGrid();
+      renderTicker();
+      setTimeout(() => btn.classList.remove('spinning'), 800);
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    initState();
+    updateWatchlistCount();
+    updateClock();
+    renderTicker();
+    renderGrid();
+
+    setInterval(tickPrices, 3000);
+    setInterval(updateClock, 1000);
+
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.stock-card').forEach(card => {
+        const sym = card.id.replace('card-', '');
+        const s = stockState[sym];
+        if (!s) return;
+        const { isUp } = fmtChange(s.price, s.prevClose);
+        const canvas = card.querySelector('canvas');
+        if (canvas) drawSparkline(canvas, s.history1d.slice(-40), isUp);
+      });
+    });
+  </script>
+</body>
+</html>
